@@ -1,54 +1,74 @@
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import TodoForm from './TodoForm';
 import TodoList from './TodoList';
 import TodoFilter from './TodoFilter';
 import TodoStats from './TodoStats';
 
+const generateId = () => Math.floor(Math.random() * 10000);
+
+// Fold Level 2
 const Todo = () => {
     const [todos, setTodos] = useState([]);
     const [filter, setFilter] = useState('all');
 
-    const generateId = () => Math.floor(Math.random() * 10000);
 
-    const handleAdd = (text) => {
-        const newTodo = {
-            id: generateId(),
-            text,
-            completed: false,
-            createdAt: new Date(),
-        };
+    const handleAdd = useCallback(
+        (text) => {
+            const newTodo = {
+                id: generateId(),
+                text,
+                completed: false,
+                createdAt: new Date(),
+            };
 
-        setTodos([...todos, newTodo]);
-    };
+            setTodos([...todos, newTodo]);
+        },
+        [todos]
+    )
 
-    const handleToggle = (id) => {
-        setTodos(todos.map((todo) => (todo.id === id ? { ...todo, completed: !todo.completed } : todo)));
-    };
+    const handleToggle = useCallback(
+        (id) => {
+            setTodos(todos.map((todo) => (todo.id === id ? { ...todo, completed: !todo.completed } : todo)));
+        },
+        [todos]
+    )
 
-    const handleDelete = (id) => {
-        setTodos(todos.filter((todo) => todo.id !== id));
-    };
+    const handleDelete = useCallback(
+        (id) => {
+            setTodos(todos.filter((todo) => todo.id !== id));
+        },
+        [todos]
+    )
 
-    const handleEdit = (id, newText) => {
-        setTodos(todos.map((todo) => (todo.id === id ? { ...todo, text: newText } : todo)));
-    };
+    const handleEdit = useCallback(
+        (id, newText) => {
+            setTodos(todos.map((todo) => (todo.id === id ? { ...todo, text: newText } : todo)));
+        },
+        [todos]
+    )
 
-    const handleFilterChange = (newFilter) => {
-        setFilter(newFilter);
-    };
+    const handleFilterChange = useCallback(
+        (newFilter) => {
+            setFilter(newFilter);
+        },
+        []
+    )
 
-    const getFilteredTodos = () => {
-        switch (filter) {
-            case 'active':
-                return todos.filter((todo) => !todo.completed);
-            case 'completed':
-                return todos.filter((todo) => todo.completed);
-            default:
-                return todos;
-        }
-    };
+    const getFilteredTodos = useCallback(
+        () => {
+            switch (filter) {
+                case 'active':
+                    return todos.filter((todo) => !todo.completed);
+                case 'completed':
+                    return todos.filter((todo) => todo.completed);
+                default:
+                    return todos;
+            }
+        },
+        [todos, filter]
+    )
 
-    const filteredTodos = getFilteredTodos();
+    const filteredTodos = useMemo(getFilteredTodos, [todos, filter])
 
     return (
         <div className="max-w-xl mx-auto p-5">
